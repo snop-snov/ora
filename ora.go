@@ -35,7 +35,7 @@ func init() {
 	_drv.cfg = *NewDrvCfg()
 
 	// init general pools
-	_drv.listPool = newPool(func() interface{} { return list.New() })
+	_drv.listPool = newListPool(func() interface{} { return list.New() })
 	_drv.envPool = newPool(func() interface{} { return &Env{openSrvs: newSrvList(), openCons: newConList()} })
 	_drv.conPool = newPool(func() interface{} { return &Con{} })
 	_drv.srvPool = newPool(func() interface{} { return &Srv{openSess: newSesList()} })
@@ -45,7 +45,7 @@ func init() {
 	_drv.rsetPool = newPool(func() interface{} { return &Rset{genByPool: true} })
 
 	// init bind pools
-	_drv.bndPools = make([]*pool, bndIdxNil+1)
+	_drv.bndPools = make([]pooler, bndIdxNil+1)
 	_drv.bndPools[bndIdxInt64] = newPool(func() interface{} { return &bndInt64{} })
 	_drv.bndPools[bndIdxInt32] = newPool(func() interface{} { return &bndInt32{} })
 	_drv.bndPools[bndIdxInt16] = newPool(func() interface{} { return &bndInt16{} })
@@ -102,7 +102,7 @@ func init() {
 	_drv.bndPools[bndIdxNil] = newPool(func() interface{} { return &bndNil{} })
 
 	// init def pools
-	_drv.defPools = make([]*pool, defIdxRowid+1)
+	_drv.defPools = make([]pooler, defIdxRowid+1)
 	_drv.defPools[defIdxInt64] = newPool(func() interface{} { return &defInt64{} })
 	_drv.defPools[defIdxInt32] = newPool(func() interface{} { return &defInt32{} })
 	_drv.defPools[defIdxInt16] = newPool(func() interface{} { return &defInt16{} })

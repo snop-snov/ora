@@ -727,26 +727,50 @@ func newMultiErrL(errs *list.List) *MultiErr {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// pool
-////////////////////////////////////////////////////////////////////////////////
+type pooler interface {
+	Get() interface{}
+	Put(interface{})
+}
+
 // prefer simple pool instead of sync.Pool to control lifetime of instances
 // sync.Pool eliminates instances at its own discretion
 // would prefer to maintain instances indefinitely; or, eventually clean on a long timer
-type pool struct {
+
+//var newPool = newListPool
+var newPool = newSyncPool
+
+////////////////////////////////////////////////////////////////////////////////
+// syncPool
+////////////////////////////////////////////////////////////////////////////////
+type syncPool struct {
+	*sync.Pool
+}
+
+var _ = pooler((*syncPool)(nil))
+
+func newSyncPool(genItem func() interface{}) *syncPool {
+	return &syncPool{Pool: &sync.Pool{New: genItem}}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// listPool
+////////////////////////////////////////////////////////////////////////////////
+type listPool struct {
 	l       *list.List
 	mu      sync.Mutex
 	genItem func() interface{}
 }
 
-func newPool(genItem func() interface{}) *pool {
-	p := &pool{}
+var _ = pooler((*listPool)(nil))
+
+func newListPool(genItem func() interface{}) *listPool {
+	p := &listPool{}
 	p.l = list.New()
 	p.genItem = genItem
 	return p
 }
 
-func (p *pool) Get() interface{} {
+func (p *listPool) Get() interface{} {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.l.Len() > 0 {
@@ -756,7 +780,7 @@ func (p *pool) Get() interface{} {
 	}
 }
 
-func (p *pool) Put(v interface{}) {
+func (p *listPool) Put(v interface{}) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.l.PushFront(v)

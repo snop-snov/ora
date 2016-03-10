@@ -124,16 +124,16 @@ type Drv struct {
 	stmtId Id
 	rsetId Id
 
-	listPool *pool
-	envPool  *pool
-	conPool  *pool
-	srvPool  *pool
-	sesPool  *pool
-	stmtPool *pool
-	txPool   *pool
-	rsetPool *pool
-	bndPools []*pool
-	defPools []*pool
+	listPool *listPool
+	envPool  pooler
+	conPool  pooler
+	srvPool  pooler
+	sesPool  pooler
+	stmtPool pooler
+	txPool   pooler
+	rsetPool pooler
+	bndPools []pooler
+	defPools []pooler
 
 	locations map[string]*time.Location
 	sqlPkgEnv *Env // An environment for use by the database/sql package.
